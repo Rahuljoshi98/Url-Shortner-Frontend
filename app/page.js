@@ -36,7 +36,7 @@ export default function LandingPage() {
       setResult(res.data.data);
       showToast('Short URL created!', 'success');
     } catch (err) {
-      const msg = err.response?.data?.error?.explanations?.[0] || 'Failed to shorten URL';
+      const msg = err.response?.data?.error?.explanation?.[0] || err.response?.data?.message || 'Failed to shorten URL';
       showToast(msg, 'error');
     } finally {
       setLoading(false);

@@ -36,7 +36,7 @@ export default function RegisterPage() {
       await login(form.email, form.password);
       router.push('/dashboard');
     } catch (err) {
-      const msg = err.response?.data?.error?.explanations?.[0] || 'Registration failed.';
+      const msg = err.response?.data?.error?.explanation?.[0] || err.response?.data?.message || 'Registration failed.';
       showToast(msg, 'error');
       setErrors({ general: msg });
     } finally {

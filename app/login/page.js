@@ -31,7 +31,7 @@ export default function LoginPage() {
       showToast('Welcome back!', 'success');
       router.push('/dashboard');
     } catch (err) {
-      const msg = err.response?.data?.error?.explanations?.[0] || 'Login failed. Check your credentials.';
+      const msg = err.response?.data?.error?.explanation?.[0] || err.response?.data?.message || 'Login failed. Check your credentials.';
       showToast(msg, 'error');
       setErrors({ general: msg });
     } finally {

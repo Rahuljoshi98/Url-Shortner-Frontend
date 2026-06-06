@@ -6,6 +6,7 @@ import { showToast } from './Toast';
 
 export default function EditModal({ url, onClose, onUpdated }) {
   const [originalUrl, setOriginalUrl] = useState(url?.originalUrl || '');
+  const [shortCode, setShortCode]     = useState(url?.shortCode || '');
   const [expiresAt, setExpiresAt]     = useState('');
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState('');
@@ -13,6 +14,7 @@ export default function EditModal({ url, onClose, onUpdated }) {
   useEffect(() => {
     if (url) {
       setOriginalUrl(url.originalUrl || '');
+      setShortCode(url.shortCode || '');
       setExpiresAt(url.expiresAt ? url.expiresAt.slice(0, 10) : '');
     }
   }, [url]);
@@ -21,18 +23,23 @@ export default function EditModal({ url, onClose, onUpdated }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!originalUrl.trim()) { setError('URL is required'); return; }
+    if (!originalUrl.trim()) { setError('Original URL is required'); return; }
+    if (!shortCode.trim()) { setError('Short Code is required'); return; }
+    
     setError('');
     setLoading(true);
     try {
-      const payload = { originalUrl: originalUrl.trim() };
+      const payload = { 
+        originalUrl: originalUrl.trim(),
+        shortCode: shortCode.trim()
+      };
       if (expiresAt) payload.expiresAt = new Date(expiresAt).toISOString();
       const res = await updateUrl(url._id, payload);
       showToast('URL updated successfully!', 'success');
       onUpdated?.(res.data.data);
       onClose();
     } catch (err) {
-      const msg = err.response?.data?.error?.explanations?.[0] || 'Update failed';
+      const msg = err.response?.data?.error?.explanation?.[0] || err.response?.data?.message || 'Update failed';
       setError(msg);
       showToast(msg, 'error');
     } finally {
@@ -49,17 +56,28 @@ export default function EditModal({ url, onClose, onUpdated }) {
         </div>
 
         <div className="modal-info">
-          <p className="modal-code">⚡ Code: <strong>{url.shortCode}</strong></p>
           <p className="modal-clicks">👆 Clicks: <strong>{url.clicks}</strong></p>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
+            <label htmlFor="edit-short-code">Short Code</label>
+            <input
+              id="edit-short-code"
+              type="text"
+              className={`input-field ${error && error.includes('Code') ? 'error' : ''}`}
+              value={shortCode}
+              onChange={(e) => { setShortCode(e.target.value); setError(''); }}
+              placeholder="e.g. my-custom-link"
+            />
+          </div>
+
+          <div className="form-group">
             <label htmlFor="edit-original-url">Original URL</label>
             <input
               id="edit-original-url"
               type="url"
-              className={`input-field ${error ? 'error' : ''}`}
+              className={`input-field ${error && error.includes('URL') ? 'error' : ''}`}
               value={originalUrl}
               onChange={(e) => { setOriginalUrl(e.target.value); setError(''); }}
               placeholder="https://example.com/very-long-url"

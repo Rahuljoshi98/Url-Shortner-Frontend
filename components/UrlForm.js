@@ -20,7 +20,7 @@ export default function UrlForm({ onCreated }) {
       setUrl('');
       onCreated?.(res.data.data);
     } catch (err) {
-      const msg = err.response?.data?.error?.explanations?.[0] || 'Failed to create short URL';
+      const msg = err.response?.data?.error?.explanation?.[0] || err.response?.data?.message || 'Failed to create short URL';
       setError(msg);
       showToast(msg, 'error');
     } finally {
