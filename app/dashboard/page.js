@@ -42,7 +42,7 @@ export default function DashboardPage() {
     setLoadingUrls(true);
     try {
       const res = await getAllUrls();
-      setUrls(res.data.data || []);
+      setUrls(res.data.data?.rows || []);
     } catch {
       showToast('Failed to load URLs', 'error');
     } finally {
