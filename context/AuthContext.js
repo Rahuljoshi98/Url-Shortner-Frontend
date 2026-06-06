@@ -5,26 +5,39 @@ import { loginUser as apiLogin, logoutUser as apiLogout } from '@/lib/api';
 
 const AuthContext = createContext(null);
 
+// Decode JWT payload without a library (base64 decode middle segment)
+function parseJwt(token) {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser]     = useState(null);   // { userId, email }
-  const [token, setToken]   = useState(null);
+  const [user, setUser]       = useState(null);   // { userId, email }
+  const [token, setToken]     = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
-    const storedUser  = localStorage.getItem('user');
-    if (storedToken && storedUser) {
+    if (storedToken) {
+      const decoded = parseJwt(storedToken);
       setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      setUser(decoded ? { userId: decoded.userId, email: decoded.email } : null);
     }
     setLoading(false);
   }, []);
 
   const login = useCallback(async (email, password) => {
     const res = await apiLogin({ email, password });
-    const { token: newToken, user: newUser } = res.data.data;
+    // Backend returns: { data: { token } } — no user object
+    const { token: newToken } = res.data.data;
+    const decoded = parseJwt(newToken);
+    const newUser = decoded ? { userId: decoded.userId, email: decoded.email } : { email };
+
     localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
     return res.data;
@@ -33,7 +46,6 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     try { await apiLogout(); } catch (_) {}
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
   }, []);
