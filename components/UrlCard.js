@@ -4,9 +4,9 @@ import { useState } from "react";
 import { deleteUrl } from "@/lib/api";
 import { showToast } from "./Toast";
 
-const BASE_URL =
-  (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000/api/") +
-  "v1/url/code/";
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000/api/";
+// Ensure the base URL points to the backend root domain (removes /api/ or /api)
+const BASE_URL = API_URL.replace(/\/api\/?$/, "/");
 
 function formatDate(dateStr) {
   if (!dateStr) return null;
